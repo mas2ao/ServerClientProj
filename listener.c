@@ -10,7 +10,7 @@ int main() {
 	sockaddr_in myaddr, cliaddr;
 	int size;
 
-	if((mysock = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
+	if((mysock = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 		perror("socket");
 		exit(1);
 	}
