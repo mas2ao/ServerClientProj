@@ -43,8 +43,9 @@ int main() {
 				perror("send");
 			}
 			close(clisock);
-			exit(0);
+			exit(1);
 		}
+		break;
 	}
 	while(wait(NULL) > 0);
 	return 0;
