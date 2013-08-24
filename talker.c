@@ -7,12 +7,13 @@
 #include <netdb.h>
 
 typedef struct sockaddr_in sockaddr_in;
+typedef struct sockaddr sockaddr;
 typedef struct hostent hostent;
 typedef struct in_addr in_addr;
 int main(int argc, char *argv[]) {
 	hostent *he;
 	sockaddr_in destaddr;
-	int sockfd;
+	int sockfd, numbytes;
 	
 	if((he = gethostbyname(argv[1])) == NULL) {
 		perror("gethostbyname");
@@ -29,6 +30,11 @@ int main(int argc, char *argv[]) {
 	destaddr.sin_addr = *((in_addr *)he->h_addr);
 	memset(&(destaddr.sin_zero), '\0', 8);
 
-	printf("name: %s\naddrtype: %d\nlenght: %d\naddr: %s\n", he->h_name, he->h_addrtype, he->h_length, inet_ntoa(*((in_addr *)he->h_addr)));
+	if((numbytes = sendto(sockfd, argv[2], strlen(argv[2]), 0, (sockaddr *)&destaddr, sizeof(sockaddr))) == -1) {
+		perror("sendto");
+		exit(1);
+	}
+
+	printf("sent %d bytes from %s", numbytes, inet_ntoa(destaddr.sin_addr));
 
 }
