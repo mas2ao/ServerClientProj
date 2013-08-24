@@ -3,10 +3,12 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <errno.h>
+#include <string.h>
 
 typedef struct sockaddr_in sockaddr_in;
 int main() {
 	int mysock, clisock;
+	char buff[100];
 	sockaddr_in myaddr, cliaddr;
 	int size;
 
@@ -39,13 +41,14 @@ int main() {
 		printf("server: got connection from %s\n", inet_ntoa(cliaddr.sin_addr));
 		if(!fork()) {
 			close(mysock);
-			if(send(clisock, "Hello World!\n", 14, 0) == -1) {
+			sprintf(buff, "Hello World from process %d!\n", getpid());
+			if(send(clisock, buff, strlen(buff), 0) == -1) {
 				perror("send");
+				exit(1);
 			}
 			close(clisock);
-			exit(1);
+			exit(0);
 		}
-		break;
 	}
 	while(wait(NULL) > 0);
 	return 0;
