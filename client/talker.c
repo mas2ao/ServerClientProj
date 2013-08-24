@@ -7,19 +7,21 @@
 #include <netdb.h>
 
 typedef struct sockaddr_in sockaddr_in;
-typedef struct hostent hostent;
 typedef struct in_addr in_addr;
+typedef struct hostent hostent;
+typedef struct sockaddr sockaddr;
 int main(int argc, char *argv[]) {
 	hostent *he;
 	sockaddr_in destaddr;
-	int sockfd;
+	char buff[100];
+	int sockfd, numbytes;
 	
 	if((he = gethostbyname(argv[1])) == NULL) {
 		perror("gethostbyname");
 		exit(1);
 	}
 
-	if((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
+	if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 		perror("socket");
 		exit(1);
 	}
@@ -29,6 +31,18 @@ int main(int argc, char *argv[]) {
 	destaddr.sin_addr = *((in_addr *)he->h_addr);
 	memset(&(destaddr.sin_zero), '\0', 8);
 
-	printf("name: %s\naddrtype: %d\nlenght: %d\naddr: %s\n", he->h_name, he->h_addrtype, he->h_length, inet_ntoa(*((in_addr *)he->h_addr)));
+	if(connect(sockfd, (sockaddr *)&destaddr, sizeof(sockaddr)) == -1) {
+		perror("connect");
+		exit(1);
+	}
 
+	if((numbytes = recv(sockfd, buff, 99, 0)) == -1) {
+		perror("recv");
+		exit(1);
+	}
+
+	buff[numbytes] = '\0';
+	printf("Received: %s", buff);
+	close(sockfd);
+	return 0;
 }

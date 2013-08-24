@@ -43,7 +43,7 @@ int main() {
 				perror("send");
 			}
 			close(clisock);
-			break;
+			exit(0);
 		}
 	}
 	while(wait(NULL) > 0);
