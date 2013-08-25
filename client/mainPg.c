@@ -1,8 +1,9 @@
 #include <stdlib.h>
-#include "../data/pessoa.h"
+#include "../data/funcionario.h"
 
 int main() {
 	int sair = 0;
+
 	while(sair == 0) {
 		mostra_menu();
 		switch(recebe_op()) {
@@ -22,6 +23,7 @@ int main() {
 		}
 		printf("\n");
 	}
+
 	return 0;
 }
 
@@ -38,6 +40,7 @@ void mostra_menu() {
 int recebe_op() {
 	int op;
 	char lin;
+
 	printf("> Digite uma opcao: ");
 	scanf("%d", &op);
 	scanf("%c", &lin);
@@ -46,8 +49,9 @@ int recebe_op() {
 }
 
 void cadastrar() {
-	pessoa cad;
+	funcionario cad;
 	char lin;
+
 	printf("\n> Nome: ");
 	gets(cad.nome);
 	printf("\n> Sobrenome: ");
@@ -60,5 +64,5 @@ void cadastrar() {
 	scanf("%d", &cad.idade);
 	scanf("%c", &lin);
 
-cadastrar_pessoa(cad);
+	cadastrar_funcionario(cad);
 }
