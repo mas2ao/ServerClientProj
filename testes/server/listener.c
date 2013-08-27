@@ -33,10 +33,11 @@ int main() {
 	}
 	
 	size = sizeof(struct sockaddr_in);
-	while(1) {
+//	while(1) {
 		if((clisock = accept(mysock, (struct sockaddr *)&cliaddr, &size)) == -1) {
 			perror("accept");
-			continue;
+			exit(1);
+//			continue;
 		}
 		printf("server: got connection from %s\n", inet_ntoa(cliaddr.sin_addr));
 		if(!fork()) {
@@ -49,7 +50,7 @@ int main() {
 			close(clisock);
 			exit(0);
 		}
-	}
+//	}
 	while(wait(NULL) > 0);
 	return 0;
 }

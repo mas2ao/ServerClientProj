@@ -6,7 +6,6 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <errno.h>
-#include <time.h>
 #include "funcionario.h"
 
 typedef struct hostent hostent;
@@ -15,9 +14,8 @@ typedef struct sockaddr sockaddr;
 typedef struct in_addr in_addr;
 
 void cadastrar_funcionario(funcionario cad) {
-	int server_number, ratio;
 	int sock;
-	sockaddr_in serv;
+	sockaddr_in inter;
 	hostent *he;
 /*
 	if(!(main = fopen("database/main.data", "r+b"))) {
@@ -25,15 +23,14 @@ void cadastrar_funcionario(funcionario cad) {
 		exit(1);
 	}
 
-	fread(&server_number, sizeof(int), 1, main);
+	fread(&interer_number, sizeof(int), 1, main);
 
-	ratio = server_number % 3;
+	ratio = interer_number % 3;
 */	
-	time_t tmp = time(0);
-	server_number = tmp % 3;
-	printf("%d\n", server_number);
-	preparar(&sock, &serv, he);
+	preparar(&sock, &inter, he);
+	conectar(sock, &inter, PORTA);
 
+	close(sock);
 }
 
 void preparar(int *sockfd, sockaddr_in *their_addr, hostent *he) {
@@ -49,5 +46,13 @@ void preparar(int *sockfd, sockaddr_in *their_addr, hostent *he) {
 
 	their_addr->sin_family = AF_INET;
 	their_addr->sin_addr = *((in_addr *)he->h_addr);
+	their_addr->sin_port = htons(PORTA);
 	memset(&(their_addr->sin_zero), '\0', 8);
+}
+
+void conectar(int sockfd, sockaddr_in *their_addr) {
+	if(connect(sockfd, (sockaddr *)their_addr, sizeof(sockaddr)) == -1) {
+		perror("connect");
+		exit(1);
+	}
 }
