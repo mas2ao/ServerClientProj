@@ -7,6 +7,9 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include "funcionario.h"
+#include "req.h"
+
+#define PORTA 9090
 
 typedef struct hostent hostent;
 typedef struct sockaddr_in sockaddr_in;
@@ -17,19 +20,9 @@ void cadastrar_funcionario(funcionario cad) {
 	int sock;
 	sockaddr_in inter;
 	hostent *he;
-/*
-	if(!(main = fopen("database/main.data", "r+b"))) {
-		printf("Error opening the file!");
-		exit(1);
-	}
 
-	fread(&interer_number, sizeof(int), 1, main);
-
-	ratio = interer_number % 3;
-*/	
 	preparar(&sock, &inter, he);
-	conectar(sock, &inter, PORTA);
-
+	conectar(sock, &inter);
 	close(sock);
 }
 
@@ -55,4 +48,10 @@ void conectar(int sockfd, sockaddr_in *their_addr) {
 		perror("connect");
 		exit(1);
 	}
+}
+
+cmd *encapsular(funcionario func, char command[3]) {
+	cmd *capsula = (cmd *) malloc(sizeof(cmd));
+
+	return capsula;
 }
