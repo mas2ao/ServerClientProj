@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include "../data/funcionario.h"
 
+
+
 int main() {
 	int sair = 0;
 
