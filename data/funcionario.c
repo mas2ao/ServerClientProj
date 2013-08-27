@@ -8,6 +8,7 @@
 typedef struct hostent hostent;
 typedef struct sockaddr_in sockaddr_in;
 typedef struct sockaddr sockaddr;
+typedef struct in_addr in_addr;
 
 void cadastrar_funcionario(funcionario cad) {
 	FILE *main;
@@ -30,5 +31,12 @@ void preparar(int *sockfd, sockaddr_in *their_addr, hostent *he) {
 		exit(1);
 	}
 
-	if((he = gethostbyname(
+	if((he = gethostbyname("localhost")) == -1) {
+		perror("gethostbyname");
+		exit(1);
+	}
+
+	their_addr->sin_family = AF_INET;
+	their_addr->sin_addr = *((in_addr *)he->h_addr);
+	memset(&(their_addr.sin_zero), '\0', 8);
 }
