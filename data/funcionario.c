@@ -6,6 +6,7 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <errno.h>
+#include <time.h>
 #include "funcionario.h"
 
 typedef struct hostent hostent;
@@ -28,6 +29,9 @@ void cadastrar_funcionario(funcionario cad) {
 
 	ratio = server_number % 3;
 */	
+	time_t tmp = time(0);
+	server_number = tmp % 3;
+	printf("%d\n", server_number);
 	preparar(&sock, &serv, he);
 
 }
