@@ -16,7 +16,8 @@ int main() {
 		perror("socket");
 		exit(1);
 	}
-
+	
+	// converte IP para binario?
 	myaddr.sin_family = AF_INET;
 	myaddr.sin_port = htons(9090);
 	myaddr.sin_addr.s_addr = INADDR_ANY;
