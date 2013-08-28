@@ -66,5 +66,7 @@ void cadastrar() {
 	scanf("%d", &cad.idade);
 	scanf("%c", &lin);
 
-	cadastrar_funcionario(cad);
+	if(!cadastrar_funcionario(cad)) {
+		printf("> Falha no cadastramento!");
+	}
 }
