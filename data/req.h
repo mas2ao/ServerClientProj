@@ -2,8 +2,10 @@
 #ifndef REQ_H
 #define REQ_H
 
+#define PORTA 9090
+
 typedef struct {
-	char command[3];
+	char command[4];
 	int filter;
 	funcionario func;
 } cmd;

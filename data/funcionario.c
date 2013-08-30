@@ -10,8 +10,6 @@
 #include "funcionario.h"
 #include "req.h"
 
-#define PORTA 9090
-
 typedef struct hostent hostent;
 typedef struct sockaddr_in sockaddr_in;
 typedef struct sockaddr sockaddr;
@@ -23,7 +21,7 @@ int cadastrar_funcionario(funcionario cad) {
 	sockaddr_in inter;
 	hostent *he;
 
-	strcpy("add", capsula.command);
+	strcpy("add", &(capsula.command));
 	if(!preparar(&sock, &inter, he)) return 0;
 	if(!conectar(sock, &inter)) return 0;
 	
@@ -34,6 +32,7 @@ int cadastrar_funcionario(funcionario cad) {
 	}
 
 	close(sock);
+	return 1;
 }
 
 int preparar(int *sockfd, sockaddr_in *their_addr, hostent *he) {
