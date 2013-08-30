@@ -8,7 +8,6 @@
 #include <errno.h>
 #include <strings.h>
 #include "funcionario.h"
-#include "req.h"
 
 typedef struct hostent hostent;
 typedef struct sockaddr_in sockaddr_in;
@@ -17,22 +16,23 @@ typedef struct in_addr in_addr;
 
 int cadastrar_funcionario(funcionario cad) {
 	int sock;
-	cmd capsula;
 	sockaddr_in inter;
 	hostent *he;
+	char package[400];
+	
+	ftochar("add", package, cad);
 
-	strcpy("add", &(capsula.command));
 	if(!preparar(&sock, &inter, he)) return 0;
 	if(!conectar(sock, &inter)) return 0;
 	
-	encapsular(&capsula, cad, 0);
-
-	if(confirma(sock)) {
-		if(!enviar(sock, capsula)) return 0;
-	}
-
+	if(!enviar(sock, package)) return 0;
+	
 	close(sock);
 	return 1;
+}
+
+void ftochar(char *cmd, char *buf, funcionario func) {
+	sprintf(buf, "%s|%s|%s|%s|%s|%d", cmd, func.nome, func.sobrenome, func.cidade, func.estado, func.idade);
 }
 
 int preparar(int *sockfd, sockaddr_in *their_addr, hostent *he) {
@@ -62,32 +62,16 @@ int conectar(int sockfd, sockaddr_in *their_addr) {
 	return 1;
 }
 
-void encapsular(cmd *capsula, funcionario func, int filter) {
-	capsula->func = func;
-	capsula->filter = filter;
-
-	return capsula;
-}
-
-int confirma(int sockfd) {
-	char buf[50];
-	int num;
-	
-	if((num = recv(sockfd, buf, 49, 0)) == -1) {
-		perror("recv");
-		return 0;
-	}
-	if(strcmp(buf, "Connection Accepted")) {
-		return 0;
-	}
-
-	return 1;
-}
-
-int enviar(int sockfd, cmd capsula) {
-	if(send(sockfd, &capsula, sizeof(cmd), 0) == -1) {
+int enviar(int sockfd, char *package) {
+	if(send(sockfd, package, strlen(package), 0) == -1) {
 		perror("send");
 		return 0;
 	}
 	return 1;
+}
+
+void print_func(funcionario f) {
+	printf("Funcionario: %s %s\n", f.nome, f.sobrenome);
+	printf("De: %s-%s\n", f.cidade, f.estado);
+	printf("%d anos\n\n", f.idade);
 }

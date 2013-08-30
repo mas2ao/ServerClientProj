@@ -59,9 +59,9 @@ void cadastrar() {
 	printf("\n> Sobrenome: ");
 	gets(cad.sobrenome);
 	printf("\n> Cidade: ");
-	gets(cad.nome);
+	gets(cad.cidade);
 	printf("\n> Estado: ");
-	gets(cad.sobrenome);
+	gets(cad.estado);
 	printf("\n> Idade: ");
 	scanf("%d", &cad.idade);
 	scanf("%c", &lin);

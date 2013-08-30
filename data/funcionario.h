@@ -1,7 +1,7 @@
 #ifndef FUNCIONARIO_H
 #define FUNCIONARIO_H
 
-
+#define PORTA 9090
 
 typedef struct {
 	char nome[100];
@@ -12,5 +12,6 @@ typedef struct {
 } funcionario;
 
 void cadastro_funcionario(funcionario cad);
+void print_func(funcionario f);
 
 #endif
