@@ -94,7 +94,9 @@ int main() {
 			while((bytes_recv = recv(sock_recv, package, sizeof(package), 0)) == -1) {
 				perror("recv");
 			}
-		
+			
+			package[bytes_recv] = '\0';
+
 			printf("%s\n", package);
 			f = chartof(package);
 			print_func(*f);
