@@ -7,6 +7,7 @@
 #include <netdb.h>
 #include <mysql/mysql.h>
 #include "../data/funcionario.h"
+#include "../data/req.h"
 #include "servers.h"
 
 typedef struct sockaddr_in sockaddr_in;

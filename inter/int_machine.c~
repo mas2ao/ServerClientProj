@@ -6,7 +6,6 @@
 #include <netdb.h>
 #include <sys/time.h>
 #include "../data/req.h"
-#include "../data/funcionario.h"
 
 int main() {
 	char package[400];

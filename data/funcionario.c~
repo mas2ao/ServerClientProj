@@ -8,7 +8,6 @@
 #include <errno.h>
 #include <strings.h>
 #include "funcionario.h"
-#include "req.h"
 
 int cadastrar_funcionario(funcionario cad) {
 	int sock;
@@ -20,7 +19,6 @@ int cadastrar_funcionario(funcionario cad) {
 
 	if(!preparar(&sock, &inter, he, PORTA)) return 0;
 	inter.sin_port = htons(PORTA);
-	printf("Confirmation port: %d, %d", htons(PORTA), inter.sin_port);
 	if(!conectar(sock, &inter)) return 0;
 	if(!enviar(sock, package)) return 0;
 
