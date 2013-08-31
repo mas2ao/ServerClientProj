@@ -9,24 +9,19 @@
 #include <strings.h>
 #include "funcionario.h"
 
-typedef struct hostent hostent;
-typedef struct sockaddr_in sockaddr_in;
-typedef struct sockaddr sockaddr;
-typedef struct in_addr in_addr;
-
 int cadastrar_funcionario(funcionario cad) {
 	int sock;
 	sockaddr_in inter;
 	hostent *he;
 	char package[400];
-	
+
 	ftochar("add", package, cad);
 
-	if(!preparar(&sock, &inter, he)) return 0;
+	if(!preparar(&sock, &inter, he, PORTA)) return 0;
 	if(!conectar(sock, &inter)) return 0;
-	
+
 	if(!enviar(sock, package)) return 0;
-	
+
 	close(sock);
 	return 1;
 }
@@ -35,7 +30,7 @@ void ftochar(char *cmd, char *buf, funcionario func) {
 	sprintf(buf, "%s|%s|%s|%s|%s|%d", cmd, func.nome, func.sobrenome, func.cidade, func.estado, func.idade);
 }
 
-int preparar(int *sockfd, sockaddr_in *their_addr, hostent *he) {
+int preparar(int *sockfd, sockaddr_in *their_addr, hostent *he, int port) {
 	if((*sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 		perror("socket");
 		return 0;
@@ -48,9 +43,9 @@ int preparar(int *sockfd, sockaddr_in *their_addr, hostent *he) {
 
 	their_addr->sin_family = AF_INET;
 	their_addr->sin_addr = *((in_addr *)he->h_addr);
-	their_addr->sin_port = htons(PORTA);
+	their_addr->sin_port = htons(port);
 	memset(&(their_addr->sin_zero), '\0', 8);
-	
+
 	return 1;
 }
 
@@ -75,3 +70,51 @@ void print_func(funcionario f) {
 	printf("De: %s-%s\n", f.cidade, f.estado);
 	printf("%d anos\n\n", f.idade);
 }
+
+funcionario *chartof(char *buf) {
+	int i = 0, flag = 0, j = 0;
+	char idade[10];
+	funcionario *func = (funcionario *) malloc(sizeof(funcionario));
+	for(i=0; i<strlen(buf); i++) {
+		if(buf[i] == '|') {
+			j = 0;
+			flag++;
+		} else {
+			switch(flag) {
+				case 0:
+					continue;
+				case 1:
+					func->nome[j] = buf[i];
+					func->nome[j+1] = '\0';
+					j++;
+					break;
+				case 2:
+					func->sobrenome[j] = buf[i];
+					func->sobrenome[j+1] = '\0';
+					j++;
+					break;
+				case 3:
+					func->cidade[j] = buf[i];
+					func->cidade[j+1] = '\0';
+					j++;
+					break;
+				case 4:
+					func->estado[j] = buf[i];
+					func->estado[j+1] = '\0';
+					j++;
+					break;
+				case 5:
+					idade[j] = buf[i];
+					idade[j+1] = '\0';
+					j++;
+					break;
+				default:
+					i = 2000;
+			}
+		}
+	}
+
+	func->idade = atoi(idade);
+	return func;
+}
+

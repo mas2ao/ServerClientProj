@@ -4,64 +4,16 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <sys/time.h>
 #include "../data/funcionario.h"
-
-typedef struct sockaddr_in sockaddr_in;
-typedef struct sockaddr sockaddr;
-
-funcionario *chartof(char *buf) {
-	int i = 0, flag = 0, j = 0;
-	char idade[10];
-	funcionario *func = (funcionario *) malloc(sizeof(funcionario));
-	for(i=0; i<strlen(buf); i++) {
-		if(buf[i] == '|') {
-			j = 0;
-			flag++;
-		} else {
-			switch(flag) {
-				case 0:
-					continue;
-				case 1:
-					func->nome[j] = buf[i];
-					func->nome[j+1] = '\0';
-					j++;
-					break;
-				case 2:
-					func->sobrenome[j] = buf[i];
-					func->sobrenome[j+1] = '\0';
-					j++;
-					break;
-				case 3:
-					func->cidade[j] = buf[i];
-					func->cidade[j+1] = '\0';
-					j++;
-					break;
-				case 4:
-					func->estado[j] = buf[i];
-					func->estado[j+1] = '\0';
-					j++;
-					break;
-				case 5:
-					idade[j] = buf[i];
-					idade[j+1] = '\0';
-					j++;
-					break;
-				default:
-					i = 2000;
-			}
-		}
-	}
-
-	func->idade = atoi(idade);
-	return func;
-}
 
 int main() {
 	char package[400];
-	int sock_list, sock_recv;
+	int sock_list, sock_recv, sock_send;
 	int addr_in_size, bytes_recv;
-	sockaddr_in inter_addr, client_addr;
-	funcionario *f, func;
+	hostent *he;
+	sockaddr_in inter_addr, client_addr, server_addr;
+	funcionario *f;
 
 	if((sock_list = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 		perror("socket");
@@ -76,7 +28,7 @@ int main() {
 		perror("bind");
 		exit(1);
 	}
-	
+
 	if(listen(sock_list, 10) == -1) {
 		perror("listen");
 		exit(1);
@@ -94,13 +46,13 @@ int main() {
 			while((bytes_recv = recv(sock_recv, package, sizeof(package), 0)) == -1) {
 				perror("recv");
 			}
-			
 			package[bytes_recv] = '\0';
 
-			printf("%s\n", package);
-			f = chartof(package);
-			print_func(*f);
-
+			if(!fork()) {
+				doEcho(&sock_send, package, &server_addr, he);
+				exit(0);
+			}
+			while(wait(NULL) > 0);
 			close(sock_recv);
 			exit(0);
 		}
@@ -110,3 +62,17 @@ int main() {
 	return 0;
 }
 
+void doEcho(int *sock, char *buf, sockaddr_in *serv, hostent *he) {
+	if(!preparar(sock, serv, he, get_porta())) return 0;
+	if(!conectar(*sock, serv)) return 0;
+	if(!enviar(*sock, buf)) return 0;
+
+	close(*sock);
+}
+
+int get_porta() {
+	struct timeval tmp;
+	gettimeofday(&tmp, NULL);
+	int porta = (tmp.tv_usec % 3) + 9990;
+	return porta;
+}
