@@ -5,12 +5,13 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <sys/time.h>
+#include <string.h>
 #include "../data/req.h"
 #include "../data/funcionario.h"
 
 int main() {
 	char package[400];
-	int sock_list, sock_recv, sock_send;
+	int sock_list, sock_recv;
 	int addr_in_size, bytes_recv;
 	hostent *he;
 	sockaddr_in inter_addr, client_addr, server_addr;
@@ -41,7 +42,7 @@ int main() {
 			perror("accept");
 			continue;
 		}
-		
+
 		if(!fork()) {
 			close(sock_list);
 			while((bytes_recv = recv(sock_recv, package, sizeof(package), 0)) == -1) {
@@ -50,7 +51,7 @@ int main() {
 			package[bytes_recv] = '\0';
 
 			if(!fork()) {
-				doEcho(&sock_send, package, &server_addr, he);
+				do_echo_command(package, &server_addr, he);
 				exit(0);
 			}
 			while(wait(NULL) > 0);
@@ -63,8 +64,79 @@ int main() {
 	return 0;
 }
 
-void doEcho(int *sock, char *buf, sockaddr_in *serv, hostent *he) {
-	if(!preparar(sock, serv, he, get_porta())) return 0;
+void do_echo_command(char *buf, sockaddr_in *serv, hostent *he) {
+	char cmd[3], resp_char[400];
+	int sock, resp, num_bytes;
+	cmd[0] = buf[0];
+	cmd[1] = buf[1];
+	cmd[2] = buf[2];
+	if(!strcmp(cmd, "add")) {
+		if(repassa_com(&sock, buf, serv, he, 0)) {
+			printf("Cadastrado com Sucesso!");
+		} else {
+			printf("Erro no Cadastramento!");
+		}
+		return;
+	}
+	int sock1, sock2, opcao = 0;
+	if(!strcmp(cmd, "con")) opcao = 1;
+
+	if(!fork()) {
+		if(!fork()) { //server1
+			if(repassa_com(&sock, buf, serv, he, 9990)) {
+				if(opcao) {
+
+				} else {
+					printf("Removido com Sucesso!");
+				}
+			}
+			exit(0);
+		} //server2
+		if(repassa_com(&sock1, buf, serv, he, 9991)) {
+			if(opcao) {
+
+			} else {
+				printf("Removido com Sucesso!");
+			}
+		}
+		exit(0);
+	} //server3
+	if(repassa_com(&sock2, buf, serv, he, 9992)) {
+		if(opcao) {
+
+		} else {
+			printf("Removido com Sucesso!");
+		}
+		exit(0);
+	}
+}
+
+char *receber(int sock) {
+	char *buf = (char *) malloc(sizeof(char)*400);
+	int num_bytes;
+	if((num_bytes = recv(sock, buf, sizeof(buf), 0)) == -1) {
+		perror("recv");
+		return NULL;
+	} 
+	buf[num_bytes] = '\0';
+	return buf;
+}
+
+int repassa_com(int *sock, char *buf, sockaddr_in *serv, hostent *he, int port) {
+	int resp;
+	if(!do_echo(sock, buf, serv, he, port)) return 0;
+	while(recv(sock, &resp, sizeof(resp), 0) == -1) {
+		perror("recv");
+		return 0; 
+	}
+	return resp;
+}
+
+void do_echo(int *sock, char *buf, sockaddr_in *serv, hostent *he, int port) {
+	if(!port) {
+		port = get_porta();
+	}
+	if(!preparar(sock, serv, he, port)) return 0;
 	if(!conectar(*sock, serv)) return 0;
 	if(!enviar(*sock, buf)) return 0;
 
