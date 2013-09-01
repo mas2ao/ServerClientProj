@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include "../data/funcionario.h"
 
+
+
 int main() {
 	int sair = 0;
 
@@ -57,12 +59,14 @@ void cadastrar() {
 	printf("\n> Sobrenome: ");
 	gets(cad.sobrenome);
 	printf("\n> Cidade: ");
-	gets(cad.nome);
+	gets(cad.cidade);
 	printf("\n> Estado: ");
-	gets(cad.sobrenome);
+	gets(cad.estado);
 	printf("\n> Idade: ");
 	scanf("%d", &cad.idade);
 	scanf("%c", &lin);
 
-	cadastrar_funcionario(cad);
+	if(!cadastrar_funcionario(cad)) {
+		printf("> Falha no cadastramento!");
+	}
 }
