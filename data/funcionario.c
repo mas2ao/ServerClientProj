@@ -10,13 +10,13 @@
 #include "funcionario.h"
 #include "req.h"
 
-int cadastrar_funcionario(funcionario cad) {
+int send_funcionario(char cmd[], funcionario cad) {
 	int sock;
 	sockaddr_in inter;
 	hostent *he;
 	char package[400];
 
-	ftochar("add", package, cad);
+	ftochar(cmd, package, cad);
 
 	if(!preparar(&sock, &inter, he, PORTA)) return 0;
 	inter.sin_port = htons(PORTA);

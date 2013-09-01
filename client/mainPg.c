@@ -13,8 +13,10 @@ int main() {
 				cadastrar();
 				break;
 			case 2:
+				consultar();
 				break;
 			case 3:
+				remover();
 				break;
 			case 4:
 				sair = 1;
@@ -53,7 +55,9 @@ int recebe_op() {
 void cadastrar() {
 	funcionario cad;
 	char lin;
-
+	printf("\n+++++++++++++++++++++++++++++++");
+	printf("\n++++++++++ CADASTRAR ++++++++++");
+	printf("\n+++++++++++++++++++++++++++++++\n");
 	printf("\n> Nome: ");
 	gets(cad.nome);
 	printf("\n> Sobrenome: ");
@@ -66,7 +70,90 @@ void cadastrar() {
 	scanf("%d", &cad.idade);
 	scanf("%c", &lin);
 
-	if(!cadastrar_funcionario(cad)) {
+	if(!send_funcionario("add", cad)) {
 		printf("> Falha no cadastramento!");
 	}
+}
+
+void consultar() {
+	int op;
+	funcionario busca;
+	char opc[10], lin;
+	printf("\n+++++++++++++++++++++++++++++++");
+	printf("\n++++++++++ CONSULTAR ++++++++++");
+	printf("\n+++++++++++++++++++++++++++++++\n");
+	printf("\n>Consultar por:");
+	printf("\n     Opção ( 1 )> NOME:");
+	printf("\n     Opção ( 2 )> SOBRENOME:");
+	printf("\n     Opção ( 3 )> CIDADE:");
+	printf("\n     Opção ( 4 )> ESTADO:");
+	printf("\n     Opção ( 5 )> IDADE:\n");
+
+	op = 0;
+	strcpy(busca.cidade, "$");
+	strcpy(busca.estado, "$");
+	while ((op > 5) || (op < 1) )  {
+		op = recebe_op();
+		switch(op) {
+			case 1:
+				printf("> Digite NOME:");
+				gets(busca.sobrenome);
+				strcpy(busca.nome, "nome");
+				send_funcionario("bus", busca);
+				break;
+			case 2:
+				printf("> Digite SOBRENOME:");
+				gets(busca.sobrenome);
+				strcpy(busca.nome, "sobrenome");
+				send_funcionario("bus", busca);
+				break;
+			case 3:
+				printf("> Digite CIDADE:");
+				gets(busca.sobrenome);
+				strcpy(busca.nome, "cidade");
+				send_funcionario("bus", busca);
+				break;
+			case 4:
+				printf("> Digite ESTADO:");
+				gets(busca.sobrenome);
+				strcpy(busca.nome, "estado");
+				send_funcionario("bus", busca);
+				break;			
+			case 5:
+				printf("> Digite IDADE:");
+				scanf("%d", &busca.idade);
+				scanf("%c", &lin);
+				strcpy(busca.nome, "idade");
+				send_funcionario("bus", busca);
+				break;
+			default:
+				op = recebe_op();
+				break;
+		}
+	}
+}
+
+void remover() {
+	funcionario rem;
+	char lin;
+
+	printf("\n+++++++++++++++++++++++++++++++");
+	printf("\n+++++++++++ REMOVER +++++++++++");
+	printf("\n+++++++++++++++++++++++++++++++\n");
+	
+	printf("\n> Nome: ");
+	gets(rem.nome);
+	printf("\n> Sobrenome: ");
+	gets(rem.sobrenome);
+	printf("\n> Cidade: ");
+	gets(rem.cidade);
+	printf("\n> Estado: ");
+	gets(rem.estado);
+	printf("\n> Idade: ");
+	scanf("%d", &rem.idade);
+	scanf("%c", &lin);
+
+	send_funcionario("rem", rem);
+	
+	
 }

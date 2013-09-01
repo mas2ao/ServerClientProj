@@ -9,7 +9,7 @@ typedef struct {
 	int idade;
 } funcionario;
 
-void cadastro_funcionario(funcionario cad);
+int send_funcionario(char cmd[], funcionario cad);
 void print_func(funcionario f);
 funcionario *chartof(char *buf);
 

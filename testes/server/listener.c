@@ -11,15 +11,17 @@ int main() {
 	char buff[100];
 	sockaddr_in myaddr, cliaddr;
 	int size;
-
-	if((mysock = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+	
+	//controle de erro se pegar socket ocupado?
+	if((mysock = socket(AF_INET, SOCK_STREAM, 0)) == -1) { 
 		perror("socket");
 		exit(1);
 	}
-
+	
+	// converte IP para binario?
 	myaddr.sin_family = AF_INET;
-	myaddr.sin_port = htons(9090);
-	myaddr.sin_addr.s_addr = INADDR_ANY;
+	myaddr.sin_port = htons(9090);	//se 0 pega porta aleatoria?
+	myaddr.sin_addr.s_addr = INADDR_ANY; //pega o IP da propria maquina?
 	memset(&(myaddr.sin_zero), '\0', 8);
 
 	if(bind(mysock, (struct sockaddr *)&myaddr, sizeof(myaddr)) == -1) {
