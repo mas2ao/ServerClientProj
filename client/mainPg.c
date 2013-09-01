@@ -100,24 +100,28 @@ void consultar() {
 				printf("> Digite NOME:");
 				gets(busca.sobrenome);
 				strcpy(busca.nome, "nome");
+				printf("---------------------------------------------\n");
 				send_funcionario("bus", busca);
 				break;
 			case 2:
 				printf("> Digite SOBRENOME:");
 				gets(busca.sobrenome);
 				strcpy(busca.nome, "sobrenome");
+				printf("---------------------------------------------\n");
 				send_funcionario("bus", busca);
 				break;
 			case 3:
 				printf("> Digite CIDADE:");
 				gets(busca.sobrenome);
 				strcpy(busca.nome, "cidade");
+				printf("---------------------------------------------\n");
 				send_funcionario("bus", busca);
 				break;
 			case 4:
 				printf("> Digite ESTADO:");
 				gets(busca.sobrenome);
 				strcpy(busca.nome, "estado");
+				printf("---------------------------------------------\n");
 				send_funcionario("bus", busca);
 				break;			
 			case 5:
@@ -125,6 +129,7 @@ void consultar() {
 				scanf("%d", &busca.idade);
 				scanf("%c", &lin);
 				strcpy(busca.nome, "idade");
+				printf("---------------------------------------------\n");
 				send_funcionario("bus", busca);
 				break;
 			default:
@@ -132,6 +137,8 @@ void consultar() {
 				break;
 		}
 	}
+
+	printf("---------------------------------------------\n");
 }
 
 void remover() {
@@ -141,7 +148,7 @@ void remover() {
 	printf("\n+++++++++++++++++++++++++++++++");
 	printf("\n+++++++++++ REMOVER +++++++++++");
 	printf("\n+++++++++++++++++++++++++++++++\n");
-	
+
 	printf("\n> Nome: ");
 	gets(rem.nome);
 	printf("\n> Sobrenome: ");
@@ -155,6 +162,6 @@ void remover() {
 	scanf("%c", &lin);
 
 	send_funcionario("rem", rem);
-	
-	
+
+
 }
