@@ -7,7 +7,6 @@
 #include <netdb.h>
 #include <sys/time.h>
 #include <string.h>
-#include <sys/shm.h>
 #include "../data/req.h"
 #include "../data/funcionario.h"
 
@@ -73,66 +72,48 @@ char *receber_pack(int sock) {
 	return buf;
 }
 
+void do_rem_bus(int opcao, int sock_cli, char *cmp, int *sock, char *buf, sockaddr_in *serv, hostent *he, int port) {
+	if(!do_echo(sock, buf, serv, he, port)) return;
+	cmp = receber_pack(sock);
+	if(strcmp(cmp, "end")) {
+		enviar(sock_cli, cmp);
+		if(opcao) {
+			while(strcmp(cmp, "end")) {
+				cmp = receber_pack(sock);
+				enviar(sock_cli, cmp);
+			}
+		}
+	}
+}
 void do_echo_command(int sock_cli, char *buf, sockaddr_in *serv, hostent *he, sockaddr_in client) {
-	char cmd[4], resp_char[400];
-	int sock, resp, num_bytes, num;
+	char cmd[4];
+	int sock;
 	cmd[0] = buf[0];
 	cmd[1] = buf[1];
 	cmd[2] = buf[2];
 	cmd[3] = '\0';
-	if(!(num = strcmp(cmd, "add"))) {
+	if(!strcmp(cmd, "add")) {
 		if(do_echo(&sock, buf, serv, he, 0)) {
-			printf("Cadastrado com Sucesso!\n");
+			enviar(sock_cli, "Cadastrado com Sucesso!\n");
 		} else {
-			printf("Erro no Cadastramento!\n");
+			enviar(sock_cli, "Erro no Cadastramento!\n");
 		}
 		close(sock);
 		return;
 	}
-	int sock1, sock2, opcao = 0, shmid;
+	int sock1, sock2, opcao = 0;
 	char *f, *g, *h;
 	if(!strcmp(cmd, "bus")) opcao = 1;
-
 	if(!fork()) {
 		if(!fork()) { //server1
-			if(!do_echo(sock, buf, serv, he, 9990)) return;
-			f = receber_pack(sock);
-			if(strcmp(f, "end")) {
-				enviar(sock_cli, f);
-				if(opcao) {
-					while(strcmp(f, "end")) {
-						f = receber_pack(sock);
-						enviar(sock_cli, f);
-					}
-				}
-			}
+			do_rem_bus(opcao, sock_cli, f, &sock, buf, serv, he, 9990);
 			exit(0);
 		} //server2
-		if(!do_echo(sock, buf, serv, he, 9991)) return;
-		g = receber_pack(sock);
-		if(strcmp(g, "end")) {
-			enviar(sock_cli, g);
-			if(opcao) {
-				while(strcmp(g, "end")) {
-					g = receber_pack(sock);
-					enviar(sock_cli, g);
-				}
-			}
-		}
+		do_rem_bus(opcao, sock_cli, g, &sock1, buf, serv, he, 9991);
 		while(wait(NULL) > 0);
 		exit(0);
 	} //server3
-	if(!do_echo(sock, buf, serv, he, 9992)) return;
-	h = receber_pack(sock);
-	if(strcmp(h, "end")) {
-		enviar(sock_cli, h);
-		if(opcao) {
-			while(strcmp(h, "end")) {
-				h = receber_pack(sock);
-				enviar(sock_cli, h);
-			}
-		}
-	}
+	do_rem_bus(opcao, sock_cli, h, &sock2, buf, serv, he, 9992);
 	while(wait(NULL) > 0);
 }
 
