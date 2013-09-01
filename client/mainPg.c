@@ -92,6 +92,7 @@ void consultar() {
 	op = 0;
 	strcpy(busca.cidade, "$");
 	strcpy(busca.estado, "$");
+	busca.idade = 0;
 	while ((op > 5) || (op < 1) )  {
 		op = recebe_op();
 		switch(op) {

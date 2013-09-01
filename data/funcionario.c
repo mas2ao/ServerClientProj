@@ -22,6 +22,7 @@ int send_funcionario(char cmd[], funcionario cad) {
 	inter.sin_port = htons(PORTA);
 	printf("Confirmation port: %d, %d", htons(PORTA), inter.sin_port);
 	if(!conectar(sock, &inter)) return 0;
+	printf("\nGot it!\n");
 	if(!enviar(sock, package)) return 0;
 
 	close(sock);

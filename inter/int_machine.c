@@ -34,7 +34,6 @@ int main() {
 		perror("listen");
 		exit(1);
 	}
-	printf("Listening on port -> %d\n", PORTA);
 
 	while(1) {
 		addr_in_size = sizeof(sockaddr_in);
@@ -50,11 +49,8 @@ int main() {
 			}
 			package[bytes_recv] = '\0';
 
-			if(!fork()) {
-				do_echo_command(package, &server_addr, he);
-				exit(0);
-			}
-			while(wait(NULL) > 0);
+			do_echo_command(package, &server_addr, he);
+			
 			close(sock_recv);
 			exit(0);
 		}
@@ -65,12 +61,13 @@ int main() {
 }
 
 void do_echo_command(char *buf, sockaddr_in *serv, hostent *he) {
-	char cmd[3], resp_char[400];
-	int sock, resp, num_bytes;
+	char cmd[4], resp_char[400];
+	int sock, resp, num_bytes, num;
 	cmd[0] = buf[0];
 	cmd[1] = buf[1];
 	cmd[2] = buf[2];
-	if(!strcmp(cmd, "add")) {
+	cmd[3] = '\0';
+	if(!(num = strcmp(cmd, "add"))) {
 		if(repassa_com(&sock, buf, serv, he, 0)) {
 			printf("Cadastrado com Sucesso!");
 		} else {
@@ -78,6 +75,7 @@ void do_echo_command(char *buf, sockaddr_in *serv, hostent *he) {
 		}
 		return;
 	}
+	printf("%d -> cmp\n", num);
 	int sock1, sock2, opcao = 0;
 	if(!strcmp(cmd, "bus")) opcao = 1;
 
@@ -99,6 +97,7 @@ void do_echo_command(char *buf, sockaddr_in *serv, hostent *he) {
 				printf("Removido com Sucesso!");
 			}
 		}
+		while(wait(NULL) > 0);
 		exit(0);
 	} //server3
 	if(repassa_com(&sock2, buf, serv, he, 9992)) {
@@ -107,8 +106,8 @@ void do_echo_command(char *buf, sockaddr_in *serv, hostent *he) {
 		} else {
 			printf("Removido com Sucesso!");
 		}
-		exit(0);
 	}
+	while(wait(NULL) > 0);
 }
 
 char *receber(int sock) {
