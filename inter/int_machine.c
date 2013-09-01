@@ -79,7 +79,7 @@ void do_echo_command(char *buf, sockaddr_in *serv, hostent *he) {
 		return;
 	}
 	int sock1, sock2, opcao = 0;
-	if(!strcmp(cmd, "con")) opcao = 1;
+	if(!strcmp(cmd, "bus")) opcao = 1;
 
 	if(!fork()) {
 		if(!fork()) { //server1
