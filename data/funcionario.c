@@ -20,13 +20,46 @@ int send_funcionario(char cmd[], funcionario cad) {
 
 	if(!preparar(&sock, &inter, he, PORTA)) return 0;
 	inter.sin_port = htons(PORTA);
-	printf("Confirmation port: %d, %d", htons(PORTA), inter.sin_port);
 	if(!conectar(sock, &inter)) return 0;
-	printf("\nGot it!\n");
 	if(!enviar(sock, package)) return 0;
+
+	if(!strcmp(cmd, "add")) {
+		do_add(sock);
+	} else {
+		receber_enquanto(sock, cmd);
+	}
 
 	close(sock);
 	return 1;
+}
+
+void do_add(int sock) {
+	char *msg = (char *) malloc(100);
+	receber(sock, msg, 100);
+	printf("%s", msg);
+}
+
+void receber_enquanto(int sock, char cmd[]) {
+	int ends = 0;
+	char f[400];
+	funcionario *func;
+	while(ends != 3) {
+		receber(sock, f, 400);
+		if(strcmp(f, "end")) {
+			if(!strcmp(cmd, "rem")) {
+				printf("Removido com Sucesso!");
+				break;
+			} else {
+				func = chartof(f);
+				print_func(*func);
+			}
+		} else {
+			ends++;
+		}
+	}
+	if(!strcmp(cmd, "rem")) {
+		printf("Registro nao Encontrado!");
+	}
 }
 
 void ftochar(char *cmd, char *buf, funcionario func) {

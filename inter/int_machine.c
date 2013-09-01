@@ -61,30 +61,20 @@ int main() {
 	return 0;
 }
 
-char *receber_pack(int sock) {
-	char *buf = (char *) malloc(sizeof(char)*400);;
-	int num_bytes;
-	if((num_bytes = recv(sock, buf, 400, 0)) == -1) {
-		perror("recv");
-		return NULL;
-	} 
-	buf[num_bytes] = '\0';
-	return buf;
-}
-
 void do_rem_bus(int opcao, int sock_cli, char *cmp, int *sock, char *buf, sockaddr_in *serv, hostent *he, int port) {
 	if(!do_echo(sock, buf, serv, he, port)) return;
-	cmp = receber_pack(sock);
+	receber(sock, cmp, 400);
 	if(strcmp(cmp, "end")) {
 		enviar(sock_cli, cmp);
 		if(opcao) {
 			while(strcmp(cmp, "end")) {
-				cmp = receber_pack(sock);
+				receber(sock, cmp, 400);
 				enviar(sock_cli, cmp);
 			}
 		}
 	}
 }
+
 void do_echo_command(int sock_cli, char *buf, sockaddr_in *serv, hostent *he, sockaddr_in client) {
 	char cmd[4];
 	int sock;

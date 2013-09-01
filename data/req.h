@@ -16,5 +16,6 @@ typedef struct in_addr in_addr;
 int preparar(int *sockfd, sockaddr_in *their_addr, hostent *he, int port);
 int conectar(int sockfd, sockaddr_in *their_addr);
 int enviar(int sockfd, char *package);
+int receber(int sock, char *buf, int size);
 
 #endif

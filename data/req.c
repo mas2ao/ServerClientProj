@@ -45,3 +45,12 @@ int enviar(int sockfd, char *package) {
 	return 1;
 }
 
+int receber(int sock, char *buf, int size) {
+	int num;
+	if((num = recv(sock, buf, size, 0)) == -1) {
+		perror("recv");
+		return 0;
+	}
+	buf[num] = '\0';
+	return 1;
+}
