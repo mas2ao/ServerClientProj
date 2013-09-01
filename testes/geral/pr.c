@@ -3,15 +3,24 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
-int main() {
+int main(int argc, char *argv[]) {
 	key_t key;
 
 	key = ftok("pr.c", 'G');
 	int shmid, *x;
 
-	shmid = shmget(key, 4, IPC_CREAT|IPC_EXCL|SHM_R|SHM_W);
-	x = (int *)shmat(shmid, NULL, 0);
-	*x = 10;
+	shmid = shmget(key, atoi(argv[1]), 0644|IPC_CREAT);
+	if((x = shmat(shmid, (void *)0, 0)) == -1) { 
+		printf("fuck\n");
+		exit(1);
+	}
+	*x = 8;
+	if(!fork()) {
+		*x = 10;
+		exit(0);
+	}
+	while(wait(NULL) > 0);
+	printf("%d\n", *x);
 	shmdt(x);
 	
 }
