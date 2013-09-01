@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -41,14 +42,14 @@ int main() {
 			perror("accept");
 			continue;
 		}
-
+		printf("%d -> sock_num\n", sock_recv);
 		if(!fork()) {
 			close(sock_list);
 			while((bytes_recv = recv(sock_recv, package, sizeof(package), 0)) == -1) {
 				perror("recv");
 			}
 			package[bytes_recv] = '\0';
-
+			printf("Received connection from: %s\n", inet_ntoa(client_addr.sin_addr));	
 			do_echo_command(package, &server_addr, he);
 			
 			close(sock_recv);
@@ -69,13 +70,12 @@ void do_echo_command(char *buf, sockaddr_in *serv, hostent *he) {
 	cmd[3] = '\0';
 	if(!(num = strcmp(cmd, "add"))) {
 		if(repassa_com(&sock, buf, serv, he, 0)) {
-			printf("Cadastrado com Sucesso!");
+			printf("Cadastrado com Sucesso!\n");
 		} else {
-			printf("Erro no Cadastramento!");
+			printf("Erro no Cadastramento!\n");
 		}
 		return;
 	}
-	printf("%d -> cmp\n", num);
 	int sock1, sock2, opcao = 0;
 	if(!strcmp(cmd, "bus")) opcao = 1;
 
@@ -85,7 +85,7 @@ void do_echo_command(char *buf, sockaddr_in *serv, hostent *he) {
 				if(opcao) {
 
 				} else {
-					printf("Removido com Sucesso!");
+					printf("Removido com Sucesso!\n");
 				}
 			}
 			exit(0);
@@ -94,7 +94,7 @@ void do_echo_command(char *buf, sockaddr_in *serv, hostent *he) {
 			if(opcao) {
 
 			} else {
-				printf("Removido com Sucesso!");
+				printf("Removido com Sucesso!\n");
 			}
 		}
 		while(wait(NULL) > 0);
@@ -104,7 +104,7 @@ void do_echo_command(char *buf, sockaddr_in *serv, hostent *he) {
 		if(opcao) {
 
 		} else {
-			printf("Removido com Sucesso!");
+			printf("Removido com Sucesso!\n");
 		}
 	}
 	while(wait(NULL) > 0);

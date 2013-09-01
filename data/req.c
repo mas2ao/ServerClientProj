@@ -24,7 +24,6 @@ int preparar(int *sockfd, sockaddr_in *their_addr, hostent *he, int port) {
 	their_addr->sin_family = AF_INET;
 	their_addr->sin_addr = *((in_addr *)he->h_addr);
 	their_addr->sin_port = htons(port);
-	printf("Connecting on port -> %d", port);
 	memset(&(their_addr->sin_zero), '\0', 8);
 
 	return 1;
