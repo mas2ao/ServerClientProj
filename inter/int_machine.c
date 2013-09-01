@@ -62,26 +62,10 @@ int main() {
 	return 0;
 }
 
-char *shm_config(char let) {	
-	char *f;
-	key_t *key = (key_t *) malloc(sizeof(key_t));
-	int *shmid = (int *) malloc(sizeof(int));
-	*key = ftok("int_machine.c", let);
-	if((*shmid = shmget(*key, 400, 0644 | IPC_CREAT)) == -1) {
-		perror("shmget");
-		return NULL;
-	}
-	if((f = shmat(shmid, (void *)0, 0)) == (void *)-1) {
-		perror("shmat");
-		return NULL;
-	}
-	return f;
-}
-
 char *receber_pack(int sock) {
-	char buf[400];
+	char *buf = (char *) malloc(sizeof(char)*400);;
 	int num_bytes;
-	if((num_bytes = recv(sock, buf, sizeof(buf), 0)) == -1) {
+	if((num_bytes = recv(sock, buf, 400, 0)) == -1) {
 		perror("recv");
 		return NULL;
 	} 
@@ -106,8 +90,7 @@ void do_echo_command(int sock_cli, char *buf, sockaddr_in *serv, hostent *he, so
 		return;
 	}
 	int sock1, sock2, opcao = 0, shmid;
-	char *f = shm_config('R'), *g = shm_config('J'), *h = shm_config('x');
-
+	char *f, *g, *h;
 	if(!strcmp(cmd, "bus")) opcao = 1;
 
 	if(!fork()) {

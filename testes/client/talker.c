@@ -14,35 +14,63 @@ int main(int argc, char *argv[]) {
 	hostent *he;
 	sockaddr_in destaddr;
 	char buff[100];
-	int sockfd, numbytes;
-	
+	int sockfd, numbytes, sockfd1, sockfd2;
+
 	if((he = gethostbyname(argv[1])) == NULL) {
 		perror("gethostbyname");
 		exit(1);
 	}
 
-	if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+
+	prep(&sockfd, &destaddr, he);	
+	//	prep(&sockfd1, &destaddr, he);	
+	//	prep(&sockfd2, &destaddr, he);	
+
+	if(!fork()) {
+		if(!fork()) {
+			sprintf(buff, "HelloWorld from process %d\n", getpid());
+			if(send(sockfd, buff, strlen(buff), 0) == -1) {
+				perror("send");
+				exit(1);
+			}
+			printf("Sent from %d\n", getpid());
+			exit(0);
+		}
+		sprintf(buff, "HelloWorld from process %d\n", getpid());
+		if(send(sockfd, buff, strlen(buff), 0) == -1) {
+			perror("send");
+			exit(1);
+		}
+		printf("Sent from %d\n", getpid());  
+		while(wait(NULL) > 0);
+		exit(0);
+	}
+	sprintf(buff, "HelloWorld from process %d\n", getpid());
+	if(send(sockfd, buff, strlen(buff), 0) == -1) {
+		perror("send");
+		exit(1);
+	}
+	printf("Sent from %d\n", getpid());
+	while(wait(NULL) >0);
+
+	close(sockfd);
+	return 0;
+}
+
+void prep(int *sock, sockaddr_in *destaddr, hostent *he) {
+
+	if((*sock = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 		perror("socket");
 		exit(1);
 	}
 
-	destaddr.sin_family = AF_INET;
-	destaddr.sin_port = htons(9090);
-	destaddr.sin_addr = *((in_addr *)he->h_addr);
-	memset(&(destaddr.sin_zero), '\0', 8);
+	destaddr->sin_family = AF_INET;
+	destaddr->sin_port = htons(9090);
+	destaddr->sin_addr = *((in_addr *)he->h_addr);
+	memset(&(destaddr->sin_zero), '\0', 8);
 
-	if(connect(sockfd, (sockaddr *)&destaddr, sizeof(sockaddr)) == -1) {
+	if(connect(*sock, (sockaddr *)destaddr, sizeof(sockaddr)) == -1) {
 		perror("connect");
 		exit(1);
 	}
-
-	if((numbytes = recv(sockfd, buff, 99, 0)) == -1) {
-		perror("recv");
-		exit(1);
-	}
-
-	buff[numbytes] = '\0';
-	printf("Received: %s", buff);
-	close(sockfd);
-	return 0;
 }
