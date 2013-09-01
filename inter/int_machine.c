@@ -7,6 +7,7 @@
 #include <netdb.h>
 #include <sys/time.h>
 #include <string.h>
+#include <sys/shm.h>
 #include "../data/req.h"
 #include "../data/funcionario.h"
 
@@ -50,8 +51,8 @@ int main() {
 			}
 			package[bytes_recv] = '\0';
 			printf("Received connection from: %s\n", inet_ntoa(client_addr.sin_addr));	
-			do_echo_command(package, &server_addr, he);
-			
+			do_echo_command(sock_recv, package, &server_addr, he, client_addr);
+
 			close(sock_recv);
 			exit(0);
 		}
@@ -61,57 +62,24 @@ int main() {
 	return 0;
 }
 
-void do_echo_command(char *buf, sockaddr_in *serv, hostent *he) {
-	char cmd[4], resp_char[400];
-	int sock, resp, num_bytes, num;
-	cmd[0] = buf[0];
-	cmd[1] = buf[1];
-	cmd[2] = buf[2];
-	cmd[3] = '\0';
-	if(!(num = strcmp(cmd, "add"))) {
-		if(repassa_com(&sock, buf, serv, he, 0)) {
-			printf("Cadastrado com Sucesso!\n");
-		} else {
-			printf("Erro no Cadastramento!\n");
-		}
-		return;
+char *shm_config(char let) {	
+	char *f;
+	key_t *key = (key_t *) malloc(sizeof(key_t));
+	int *shmid = (int *) malloc(sizeof(int));
+	*key = ftok("int_machine.c", let);
+	if((*shmid = shmget(*key, 400, 0644 | IPC_CREAT)) == -1) {
+		perror("shmget");
+		return NULL;
 	}
-	int sock1, sock2, opcao = 0;
-	if(!strcmp(cmd, "bus")) opcao = 1;
-
-	if(!fork()) {
-		if(!fork()) { //server1
-			if(repassa_com(&sock, buf, serv, he, 9990)) {
-				if(opcao) {
-
-				} else {
-					printf("Removido com Sucesso!\n");
-				}
-			}
-			exit(0);
-		} //server2
-		if(repassa_com(&sock1, buf, serv, he, 9991)) {
-			if(opcao) {
-
-			} else {
-				printf("Removido com Sucesso!\n");
-			}
-		}
-		while(wait(NULL) > 0);
-		exit(0);
-	} //server3
-	if(repassa_com(&sock2, buf, serv, he, 9992)) {
-		if(opcao) {
-
-		} else {
-			printf("Removido com Sucesso!\n");
-		}
+	if((f = shmat(shmid, (void *)0, 0)) == (void *)-1) {
+		perror("shmat");
+		return NULL;
 	}
-	while(wait(NULL) > 0);
+	return f;
 }
 
-char *receber(int sock) {
-	char *buf = (char *) malloc(sizeof(char)*400);
+char *receber_pack(int sock) {
+	char buf[400];
 	int num_bytes;
 	if((num_bytes = recv(sock, buf, sizeof(buf), 0)) == -1) {
 		perror("recv");
@@ -121,14 +89,68 @@ char *receber(int sock) {
 	return buf;
 }
 
-int repassa_com(int *sock, char *buf, sockaddr_in *serv, hostent *he, int port) {
-	int resp;
-	if(!do_echo(sock, buf, serv, he, port)) return 0;
-	while(recv(sock, &resp, sizeof(resp), 0) == -1) {
-		perror("recv");
-		return 0; 
+void do_echo_command(int sock_cli, char *buf, sockaddr_in *serv, hostent *he, sockaddr_in client) {
+	char cmd[4], resp_char[400];
+	int sock, resp, num_bytes, num;
+	cmd[0] = buf[0];
+	cmd[1] = buf[1];
+	cmd[2] = buf[2];
+	cmd[3] = '\0';
+	if(!(num = strcmp(cmd, "add"))) {
+		if(do_echo(&sock, buf, serv, he, 0)) {
+			printf("Cadastrado com Sucesso!\n");
+		} else {
+			printf("Erro no Cadastramento!\n");
+		}
+		close(sock);
+		return;
 	}
-	return resp;
+	int sock1, sock2, opcao = 0, shmid;
+	char *f = shm_config('R'), *g = shm_config('J'), *h = shm_config('x');
+
+	if(!strcmp(cmd, "bus")) opcao = 1;
+
+	if(!fork()) {
+		if(!fork()) { //server1
+			if(!do_echo(sock, buf, serv, he, 9990)) return;
+			f = receber_pack(sock);
+			if(strcmp(f, "end")) {
+				enviar(sock_cli, f);
+				if(opcao) {
+					while(strcmp(f, "end")) {
+						f = receber_pack(sock);
+						enviar(sock_cli, f);
+					}
+				}
+			}
+			exit(0);
+		} //server2
+		if(!do_echo(sock, buf, serv, he, 9991)) return;
+		g = receber_pack(sock);
+		if(strcmp(g, "end")) {
+			enviar(sock_cli, g);
+			if(opcao) {
+				while(strcmp(g, "end")) {
+					g = receber_pack(sock);
+					enviar(sock_cli, g);
+				}
+			}
+		}
+		while(wait(NULL) > 0);
+		exit(0);
+	} //server3
+	if(!do_echo(sock, buf, serv, he, 9992)) return;
+	h = receber_pack(sock);
+	if(strcmp(h, "end")) {
+		enviar(sock_cli, h);
+		if(opcao) {
+			while(strcmp(h, "end")) {
+				h = receber_pack(sock);
+				enviar(sock_cli, h);
+			}
+		}
+	}
+	while(wait(NULL) > 0);
 }
 
 void do_echo(int *sock, char *buf, sockaddr_in *serv, hostent *he, int port) {
@@ -139,7 +161,7 @@ void do_echo(int *sock, char *buf, sockaddr_in *serv, hostent *he, int port) {
 	if(!conectar(*sock, serv)) return 0;
 	if(!enviar(*sock, buf)) return 0;
 
-	close(*sock);
+	return 1;
 }
 
 int get_porta() {
